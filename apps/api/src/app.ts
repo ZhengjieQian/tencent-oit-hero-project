@@ -101,7 +101,6 @@ export function createApp(db: Database.Database) {
   });
 
   app.patch("/api/operator/tenants/:tenantId/status", (_req, res) => {
-    // TODO(candidate): implement the status update for the current stage.
     return res.status(501).json({ error: "not_implemented" });
   });
 
