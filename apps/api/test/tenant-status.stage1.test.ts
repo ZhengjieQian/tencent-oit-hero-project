@@ -36,6 +36,26 @@ describe("stage 1: operator tenant status updates", () => {
     ).toEqual({ status: "suspended" });
   });
 
+  it("reactivates the selected tenant without changing another tenant", async () => {
+    const operator = await signedIn("platform-admin");
+    await operator
+      .patch("/api/operator/tenants/acme/status")
+      .send({ status: "suspended" })
+      .expect(200);
+    const response = await operator
+      .patch("/api/operator/tenants/acme/status")
+      .send({ status: "active" })
+      .expect(200);
+
+    expect(response.body.tenant.status).toBe("active");
+    expect(
+      db.prepare("SELECT status FROM tenants WHERE id = 'acme'").get(),
+    ).toEqual({ status: "active" });
+    expect(
+      db.prepare("SELECT status FROM tenants WHERE id = 'globex'").get(),
+    ).toEqual({ status: "active" });
+  });
+
   it("rejects status changes by tenant users and unauthenticated callers", async () => {
     for (const actorId of ["acme-admin", "acme-member"]) {
       const user = await signedIn(actorId);

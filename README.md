@@ -4,7 +4,7 @@
 
 ## 环境要求
 
-- Node.js 22 或更新版本
+- Node.js 22.12.x 或 24.x（本 repo 依赖当前 Vite/jsdom 支持的 Node LTS 版本）
 - npm 10 或更新版本
 
 ## 本地启动

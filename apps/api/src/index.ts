@@ -5,7 +5,7 @@ const db = createDatabase();
 seedDemoData(db);
 const port = Number(process.env.PORT ?? 3001);
 const app = createApp(db);
-const server = app.listen(port, () =>
+const server = app.listen(port, "127.0.0.1", () =>
   console.log(`API listening on http://localhost:${port}`),
 );
 

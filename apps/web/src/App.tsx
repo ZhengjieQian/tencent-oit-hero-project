@@ -106,14 +106,16 @@ export default function App() {
             {error}
           </p>
         )}
-        {!actor && !error ? (
-          <section className="panel empty-state" role="status">
-            Preparing the demo workspace…
-          </section>
-        ) : actor?.role === "platform_admin" ? (
+        {!actor ? (
+          error ? null : (
+            <section className="panel empty-state" role="status">
+              Preparing the demo workspace…
+            </section>
+          )
+        ) : actor.role === "platform_admin" ? (
           <TenantDirectory />
         ) : (
-          <TenantConsole />
+          <TenantConsole key={actor.id} />
         )}
         <p className="demo-notice">
           <span aria-hidden="true">ⓘ</span> Demo identity switching is

@@ -1,9 +1,14 @@
 import Database from "better-sqlite3";
-import { mkdirSync, rmSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+export const DEFAULT_DATABASE_FILE = fileURLToPath(
+  new URL("../../data/hero.sqlite", import.meta.url),
+);
 
 export function createDatabase(
-  filename = process.env.DATABASE_FILE ?? "./data/hero.sqlite",
+  filename = DEFAULT_DATABASE_FILE,
 ): Database.Database {
   if (filename !== ":memory:") {
     mkdirSync(dirname(filename), { recursive: true });
@@ -40,44 +45,49 @@ export function createDatabase(
 }
 
 export function seedDemoData(db: Database.Database): void {
-  const seed = db.transaction(() => {
-    db.prepare(
-      "INSERT OR IGNORE INTO tenants (id, name, status, subscription_ends_at) VALUES (?, ?, ?, ?)",
-    ).run("acme", "Acme Studio", "active", "2027-01-15");
-    db.prepare(
-      "INSERT OR IGNORE INTO tenants (id, name, status, subscription_ends_at) VALUES (?, ?, ?, ?)",
-    ).run("globex", "Globex Labs", "active", "2026-12-01");
-    const insertUser = db.prepare(
-      "INSERT OR IGNORE INTO users (id, email, role, tenant_id) VALUES (?, ?, ?, ?)",
-    );
-    insertUser.run(
-      "platform-admin",
-      "ops@northstar.example",
-      "platform_admin",
-      null,
-    );
-    insertUser.run("acme-admin", "admin@acme.example", "tenant_admin", "acme");
-    insertUser.run(
-      "globex-admin",
-      "admin@globex.example",
-      "tenant_admin",
-      "globex",
-    );
-    insertUser.run("acme-member", "member@acme.example", "member", "acme");
-  });
-  seed();
+  db.transaction(() => insertDemoData(db))();
 }
 
-export function resetDatabase(
-  filename = process.env.DATABASE_FILE ?? "./data/hero.sqlite",
-): void {
-  if (filename !== ":memory:") {
-    rmSync(filename, { force: true });
-    rmSync(`${filename}-wal`, { force: true });
-    rmSync(`${filename}-shm`, { force: true });
-    mkdirSync(dirname(filename), { recursive: true });
+export function resetDemoData(db: Database.Database): void {
+  db.transaction(() => {
+    db.exec(
+      "DELETE FROM audit_events; DELETE FROM users; DELETE FROM tenants;",
+    );
+    insertDemoData(db);
+  })();
+}
+
+export function resetDatabase(): void {
+  const db = createDatabase();
+  try {
+    resetDemoData(db);
+  } finally {
+    db.close();
   }
-  const db = createDatabase(filename);
-  seedDemoData(db);
-  db.close();
+}
+
+function insertDemoData(db: Database.Database): void {
+  db.prepare(
+    "INSERT OR IGNORE INTO tenants (id, name, status, subscription_ends_at) VALUES (?, ?, ?, ?)",
+  ).run("acme", "Acme Studio", "active", "2027-01-15");
+  db.prepare(
+    "INSERT OR IGNORE INTO tenants (id, name, status, subscription_ends_at) VALUES (?, ?, ?, ?)",
+  ).run("globex", "Globex Labs", "active", "2026-12-01");
+  const insertUser = db.prepare(
+    "INSERT OR IGNORE INTO users (id, email, role, tenant_id) VALUES (?, ?, ?, ?)",
+  );
+  insertUser.run(
+    "platform-admin",
+    "ops@northstar.example",
+    "platform_admin",
+    null,
+  );
+  insertUser.run("acme-admin", "admin@acme.example", "tenant_admin", "acme");
+  insertUser.run(
+    "globex-admin",
+    "admin@globex.example",
+    "tenant_admin",
+    "globex",
+  );
+  insertUser.run("acme-member", "member@acme.example", "member", "acme");
 }

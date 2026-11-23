@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run test/tenant-read.test.ts",
+    "test": "vitest run --exclude test/tenant-status.stage1.test.ts",
     "test:challenge": "vitest run test/tenant-status.stage1.test.ts",
     "db:reset": "tsx src/db/reset.ts"
   },

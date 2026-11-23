@@ -40,6 +40,12 @@ describe("starter tenant read paths", () => {
     const acme = await signedIn("acme-admin");
     const current = await acme.get("/api/tenant/current").expect(200);
     expect(current.body.tenant.id).toBe("acme");
+    expect(current.body.tenant).toMatchObject({
+      id: "acme",
+      name: "Acme Studio",
+      status: "active",
+    });
+    expect(current.body.tenant).not.toHaveProperty("subscriptionEndsAt");
     const members = await acme
       .get("/api/tenant/members?tenantId=globex")
       .expect(200);

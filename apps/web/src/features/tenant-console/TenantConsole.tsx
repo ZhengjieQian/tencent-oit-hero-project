@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { TenantSummary } from "@hero/contracts";
+import type { TenantStatusInfo } from "@hero/contracts";
 import { api } from "../../api.js";
 
 interface Member {
@@ -8,7 +8,7 @@ interface Member {
   role: string;
 }
 interface TenantData {
-  tenant: TenantSummary;
+  tenant: TenantStatusInfo;
 }
 interface MemberList {
   items: Member[];
@@ -18,7 +18,7 @@ interface WorkspaceData {
 }
 
 export default function TenantConsole() {
-  const [tenant, setTenant] = useState<TenantSummary | null>(null);
+  const [tenant, setTenant] = useState<TenantStatusInfo | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [workspace, setWorkspace] = useState("");
   const [error, setError] = useState("");

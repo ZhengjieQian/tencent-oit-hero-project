@@ -15,6 +15,8 @@ export interface TenantSummary {
   subscriptionEndsAt: string;
 }
 
+export type TenantStatusInfo = Pick<TenantSummary, "id" | "name" | "status">;
+
 export interface ApiError {
   error: string;
   message?: string;

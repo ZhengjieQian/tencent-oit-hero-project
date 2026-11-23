@@ -64,10 +64,10 @@ export function createApp(db: Database.Database) {
     if (!actor.tenantId || actor.role === "platform_admin")
       return res.status(403).json({ error: "tenant_user_required" });
     const tenant = db
-      .prepare(
-        "SELECT id, name, status, subscription_ends_at AS subscriptionEndsAt FROM tenants WHERE id = ?",
-      )
-      .get(actor.tenantId) as TenantSummary | undefined;
+      .prepare("SELECT id, name, status FROM tenants WHERE id = ?")
+      .get(actor.tenantId) as
+      | Pick<TenantSummary, "id" | "name" | "status">
+      | undefined;
     if (!tenant) return res.status(404).json({ error: "tenant_not_found" });
     return res.json({ tenant });
   });
