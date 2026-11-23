@@ -1,5 +1,7 @@
 # Northstar SaaS 管理平台面试项目
 
+English: [`README.en.md`](README.en.md)
+
 面向 Junior 全栈工程师的本地 Vibe Coding 面试项目。前端、API 和 SQLite 种子数据都在本地运行，不依赖外部服务账号或密钥。
 
 ## 环境要求
@@ -43,6 +45,6 @@ npm run db:inspect       # 只读查看 SQLite 中的租户状态
 
 ## 题目
 
-通用规则在 [`docs/interview/candidate-prompt.md`](docs/interview/candidate-prompt.md)。面试官会另外分阶段发送需求说明；候选人初始拿到的 repo 不包含第二、三阶段题目。
+通用规则见中文 [`docs/interview/candidate-prompt.md`](docs/interview/candidate-prompt.md) 和英文 [`docs/interview/candidate-prompt.en.md`](docs/interview/candidate-prompt.en.md)。面试官会另外分阶段发送需求说明；候选人初始拿到的 repo 不包含第二、三阶段题目。
 
 本地可执行 Vercel CLI 指令时，建议安装 `npm i -g vercel`，可使用 `vercel env pull`、`vercel deploy` 和 `vercel logs` 等工作流；本面试项目本地运行不需要 CLI 或部署。
