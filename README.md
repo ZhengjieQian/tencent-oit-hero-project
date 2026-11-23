@@ -33,12 +33,13 @@ npm run dev
 
 ```bash
 npm test                 # 起始代码已有行为，应该通过
-npm run test:challenge   # 第一阶段 API 验收测试，起始时会失败
+npm run test:challenge   # 第一阶段前端搜索验收测试，起始时会失败
 npm run typecheck
 npm run build
+npm run db:inspect       # 只读查看 SQLite 中的租户状态
 ```
 
-候选人会在面试中逐阶段收到剩余需求。第一阶段测试只检查运营端租户状态写入和授权。第二、三阶段要求候选人根据新需求自行补充测试。
+候选人会在面试中逐阶段收到需求说明。第一阶段是一个前端搜索 bug 修复；后续阶段的需求由面试官按进度单独发送。
 
 ## 题目
 

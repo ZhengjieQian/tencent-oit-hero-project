@@ -15,8 +15,9 @@
     "build": "npm run build --workspace @hero/contracts && npm run build --workspace @hero/api && npm run build --workspace @hero/web",
     "typecheck": "npm run typecheck --workspace @hero/contracts && npm run typecheck --workspace @hero/api && npm run typecheck --workspace @hero/web",
     "test": "npm run test --workspace @hero/api && npm run test --workspace @hero/web",
-    "test:challenge": "npm run test:challenge --workspace @hero/api",
-    "db:reset": "npm run db:reset --workspace @hero/api"
+    "test:challenge": "npm run test:challenge --workspace @hero/web",
+    "db:reset": "npm run db:reset --workspace @hero/api",
+    "db:inspect": "npm run db:inspect --workspace @hero/api"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

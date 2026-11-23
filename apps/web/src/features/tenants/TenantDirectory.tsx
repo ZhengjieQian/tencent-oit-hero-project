@@ -89,7 +89,7 @@ export default function TenantDirectory() {
         className="search-row"
         onSubmit={(event) => {
           event.preventDefault();
-          void loadTenants();
+          void loadTenants("");
         }}
       >
         <label className="sr-only" htmlFor="tenant-search">

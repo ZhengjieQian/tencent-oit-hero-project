@@ -7,7 +7,8 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --pretty false",
-    "test": "vitest run"
+    "test": "vitest run --exclude src/__tests__/stage1-search.test.tsx",
+    "test:challenge": "vitest run src/__tests__/stage1-search.test.tsx"
   },
   "dependencies": {
     "@hero/contracts": "*",
