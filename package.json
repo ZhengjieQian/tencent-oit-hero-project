@@ -1,0 +1,21 @@
+{
+  "name": "saas-admin-hero",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web",
+    "packages/contracts"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,green \"npm run dev --workspace @hero/api\" \"npm run dev --workspace @hero/web\"",
+    "build": "npm run build --workspace @hero/contracts && npm run build --workspace @hero/api && npm run build --workspace @hero/web",
+    "typecheck": "npm run typecheck --workspace @hero/contracts && npm run typecheck --workspace @hero/api && npm run typecheck --workspace @hero/web",
+    "test": "npm run test --workspace @hero/api && npm run test --workspace @hero/web",
+    "test:challenge": "npm run test:challenge --workspace @hero/api",
+    "db:reset": "npm run db:reset --workspace @hero/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  }
+}

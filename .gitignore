@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+*.tsbuildinfo
+.env
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.DS_Store
+.superpowers/
+/interviewer-materials/
+/docs/superpowers/
