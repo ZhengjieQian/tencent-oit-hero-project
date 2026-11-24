@@ -73,7 +73,27 @@ export function createApp(db: Pool) {
     return res.json({ items: result.rows });
   });
 
-  app.patch("/api/operator/tenants/:tenantId/status", (_req, res) => res.status(501).json({ error: "not_implemented" }));
+  app.patch("/api/operator/tenants/:tenantId/status", async (req, res) => {
+    const actor = await requireActor(req, res, sessions);
+    if (!actor) return;
+    if (actor.role !== "platform_admin") return res.status(403).json({ error: "forbidden" });
+
+    const status = req.body?.status;
+    if (status !== "active" && status !== "suspended") {
+      return res.status(400).json({ error: "invalid_status" });
+    }
+
+    const result = await db.query<TenantSummary>(
+      `UPDATE tenants
+       SET status = $1
+       WHERE id = $2
+       RETURNING id, name, status, subscription_ends_at AS "subscriptionEndsAt"`,
+      [status, req.params.tenantId],
+    );
+    const tenant = result.rows[0];
+    if (!tenant) return res.status(404).json({ error: "tenant_not_found" });
+    return res.json({ tenant });
+  });
   return app;
 }
 
