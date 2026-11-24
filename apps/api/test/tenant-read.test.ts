@@ -36,6 +36,27 @@ describe("starter tenant read paths", () => {
     await request(app).get("/api/operator/tenants").expect(401);
   });
 
+  it("provides rich tenant and people data for the candidate directory UI", async () => {
+    const operator = await signedIn("platform-admin");
+    const response = await operator.get("/api/operator/tenants").expect(200);
+
+    expect(response.body.items).toHaveLength(4);
+    expect(response.body.items.find((tenant: { id: string }) => tenant.id === "globex"))
+      .toMatchObject({
+        id: "globex",
+        region: "Europe",
+        plan: "Enterprise",
+        industry: "Industrial",
+        employeeCount: 1280,
+        members: expect.arrayContaining([
+          expect.objectContaining({
+            name: "Chloe Zhang",
+            email: "chloe.zhang@globex.example",
+          }),
+        ]),
+      });
+  });
+
   it("derives tenant profile and member scope from the active session", async () => {
     const acme = await signedIn("acme-admin");
     const current = await acme.get("/api/tenant/current").expect(200);
@@ -51,7 +72,7 @@ describe("starter tenant read paths", () => {
       .expect(200);
     expect(
       members.body.items.map((member: { id: string }) => member.id).sort(),
-    ).toEqual(["acme-admin", "acme-member"]);
+    ).toEqual(["acme-admin", "acme-member", "acme-mia", "acme-noah"]);
     expect(
       members.body.items.some(
         (member: { id: string }) => member.id === "globex-admin",

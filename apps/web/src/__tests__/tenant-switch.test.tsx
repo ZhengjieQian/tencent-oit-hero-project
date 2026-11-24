@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import App from "../App.js";
+import { I18nProvider } from "../i18n.js";
 
 afterEach(() => {
   cleanup();
@@ -64,7 +65,11 @@ describe("demo tenant identity switching", () => {
       }),
     );
 
-    render(<App />);
+    render(
+      <I18nProvider>
+        <App />
+      </I18nProvider>,
+    );
     const selector = await screen.findByLabelText("DEMO IDENTITY");
     fireEvent.change(selector, { target: { value: "acme-admin" } });
     expect(

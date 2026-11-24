@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import type { TenantSummary, TenantStatus } from "@hero/contracts";
 import { api } from "../../api.js";
+import {
+  localizedError,
+  localizedPlan,
+  localizedRegion,
+  useI18n,
+} from "../../i18n.js";
 
 interface TenantListResponse {
   items: TenantSummary[];
@@ -10,26 +16,31 @@ interface TenantResponse {
 }
 
 export default function TenantDirectory() {
+  const { language, t } = useI18n();
   const [items, setItems] = useState<TenantSummary[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<unknown>(null);
   const [confirmation, setConfirmation] = useState<TenantSummary | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
+  const currency = new Intl.NumberFormat(language === "zh" ? "zh-CN" : "en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+
   async function loadTenants(search = query) {
     setLoading(true);
-    setError("");
+    setError(null);
     try {
       const result = await api<TenantListResponse>(
         `/api/operator/tenants?q=${encodeURIComponent(search)}`,
       );
       setItems(result.items);
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Could not load tenants.",
-      );
+      setError(cause);
     } finally {
       setLoading(false);
     }
@@ -48,7 +59,7 @@ export default function TenantDirectory() {
   async function confirmStatusChange() {
     if (!confirmation || !nextStatus) return;
     setSaving(true);
-    setError("");
+    setError(null);
     setMessage("");
     try {
       await api<TenantResponse>(
@@ -58,12 +69,10 @@ export default function TenantDirectory() {
           body: JSON.stringify({ status: nextStatus }),
         },
       );
-      setMessage(`${confirmation.name} updated successfully.`);
+      setMessage(confirmation.name);
       setConfirmation(null);
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Could not update tenant.",
-      );
+      setError(cause);
     } finally {
       setSaving(false);
     }
@@ -73,15 +82,15 @@ export default function TenantDirectory() {
     <section className="panel" aria-labelledby="tenant-directory-title">
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">CUSTOMER ACCOUNTS</p>
-          <h2 id="tenant-directory-title">Tenant directory</h2>
+          <p className="eyebrow">{t("directory.eyebrow")}</p>
+          <h2 id="tenant-directory-title">{t("directory.title")}</h2>
           <p className="muted">
-            Manage customer access and subscription status.
+            {t("directory.description")}
           </p>
         </div>
         <div className="metric">
           <span>{items.length}</span>
-          <small>tenants shown</small>
+          <small>{t("directory.count")}</small>
         </div>
       </div>
 
@@ -93,45 +102,50 @@ export default function TenantDirectory() {
         }}
       >
         <label className="sr-only" htmlFor="tenant-search">
-          Search tenants
+          {t("directory.searchLabel")}
         </label>
         <input
           id="tenant-search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search by tenant name"
+          placeholder={t("directory.searchPlaceholder")}
         />
         <button className="button button-secondary" type="submit">
-          Search
+          {t("directory.search")}
         </button>
       </form>
 
-      {error && (
+      {error !== null && (
         <p className="alert alert-error" role="alert">
-          {error}
+          {localizedError(error, t("error.loadTenants"), t)}
         </p>
       )}
       {message && (
         <p className="alert alert-success" role="status">
-          {message}
+          {t("directory.updated", { tenant: message })}
         </p>
       )}
       {loading ? (
         <p className="empty-state" role="status">
-          Loading tenants…
+          {t("directory.loading")}
         </p>
       ) : items.length === 0 ? (
-        <p className="empty-state">No tenants match this search.</p>
+        <p className="empty-state">{t("directory.empty")}</p>
       ) : (
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
-                <th>Tenant</th>
-                <th>Subscription through</th>
-                <th>Status</th>
+                <th>{t("directory.column.tenant")}</th>
+                <th>{t("directory.column.people")}</th>
+                <th>{t("directory.column.region")}</th>
+                <th>{t("directory.column.plan")}</th>
+                <th>{t("directory.column.employees")}</th>
+                <th>{t("directory.column.arr")}</th>
+                <th>{t("directory.column.subscription")}</th>
+                <th>{t("directory.column.status")}</th>
                 <th>
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{t("directory.column.actions")}</span>
                 </th>
               </tr>
             </thead>
@@ -143,9 +157,30 @@ export default function TenantDirectory() {
                     <small className="table-subtitle">{tenant.id}</small>
                   </td>
                   <td>
+                    <details className="people-details">
+                      <summary>
+                        {t("directory.memberCount", {
+                          count: tenant.members.length,
+                        })}
+                      </summary>
+                      <ul>
+                        {tenant.members.map((member) => (
+                          <li key={member.id}>
+                            <strong>{member.name}</strong>
+                            <small>{member.email}</small>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  </td>
+                  <td>{localizedRegion(tenant.region, t)}</td>
+                  <td>{localizedPlan(tenant.plan, t)}</td>
+                  <td>{tenant.employeeCount.toLocaleString(language === "zh" ? "zh-CN" : "en-US")}</td>
+                  <td>{currency.format(tenant.annualRecurringRevenueCents / 100)}</td>
+                  <td>
                     {new Date(
                       `${tenant.subscriptionEndsAt}T00:00:00`,
-                    ).toLocaleDateString("en-US", {
+                    ).toLocaleDateString(language === "zh" ? "zh-CN" : "en-US", {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
@@ -153,7 +188,9 @@ export default function TenantDirectory() {
                   </td>
                   <td>
                     <span className={`status-pill status-${tenant.status}`}>
-                      {tenant.status}
+                      {tenant.status === "active"
+                        ? t("directory.status.active")
+                        : t("directory.status.suspended")}
                     </span>
                   </td>
                   <td className="action-cell">
@@ -162,7 +199,9 @@ export default function TenantDirectory() {
                       onClick={() => setConfirmation(tenant)}
                       type="button"
                     >
-                      {tenant.status === "active" ? "Suspend" : "Reactivate"}
+                      {tenant.status === "active"
+                        ? t("directory.action.suspend")
+                        : t("directory.action.reactivate")}
                     </button>
                   </td>
                 </tr>
@@ -180,15 +219,21 @@ export default function TenantDirectory() {
             aria-modal="true"
             aria-labelledby="confirm-title"
           >
-            <p className="eyebrow">CONFIRM TENANT CHANGE</p>
+            <p className="eyebrow">{t("directory.confirm.eyebrow")}</p>
             <h3 id="confirm-title">
-              {nextStatus === "suspended" ? "Suspend" : "Reactivate"}{" "}
-              {confirmation.name}?
+              {t(
+                nextStatus === "suspended"
+                  ? "directory.confirm.suspendTitle"
+                  : "directory.confirm.reactivateTitle",
+                { tenant: confirmation.name },
+              )}
             </h3>
             <p className="muted">
-              {nextStatus === "suspended"
-                ? "Tenant members will lose console access. Their data will remain available."
-                : "Tenant members will regain console access."}
+              {t(
+                nextStatus === "suspended"
+                  ? "directory.confirm.suspendBody"
+                  : "directory.confirm.reactivateBody",
+              )}
             </p>
             <div className="dialog-actions">
               <button
@@ -197,7 +242,7 @@ export default function TenantDirectory() {
                 type="button"
                 disabled={saving}
               >
-                Cancel
+                {t("directory.confirm.cancel")}
               </button>
               <button
                 className="button button-primary"
@@ -206,8 +251,12 @@ export default function TenantDirectory() {
                 disabled={saving}
               >
                 {saving
-                  ? "Saving…"
-                  : `Confirm ${nextStatus === "suspended" ? "suspension" : "reactivation"}`}
+                  ? t("directory.confirm.saving")
+                  : t(
+                      nextStatus === "suspended"
+                        ? "directory.confirm.suspend"
+                        : "directory.confirm.reactivate",
+                    )}
               </button>
             </div>
           </section>

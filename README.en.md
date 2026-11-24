@@ -54,7 +54,7 @@ The identity selector is for local interview practice only. The demo-session API
 
 In Windows PowerShell, replace `./scripts/npm.sh` with `./scripts/npm.ps1`. These wrappers use the project-local Node/npm downloaded at first launch and do not require PATH setup in another terminal.
 
-The interviewer sends one requirement at a time. Stage 1 is a front-end search bug fix. Later-stage prompts are sent separately and are not included in the candidate repository.
+The interviewer sends one requirement at a time. Stage 1 adds front-end search for tenants and their members, plus status, region, and plan filters. Later-stage prompts are sent separately and are not included in the candidate repository.
 
 ## Interview prompt
 

@@ -45,16 +45,27 @@ export function createApp(db: Database.Database) {
     if (actor.role !== "platform_admin")
       return res.status(403).json({ error: "forbidden" });
     const query = typeof req.query.q === "string" ? req.query.q.trim() : "";
-    const items = db
+    const tenants = db
       .prepare(
         `
-      SELECT id, name, status, subscription_ends_at AS subscriptionEndsAt
+      SELECT id, name, status, subscription_ends_at AS subscriptionEndsAt,
+        region, plan, industry, employee_count AS employeeCount,
+        annual_recurring_revenue_cents AS annualRecurringRevenueCents
       FROM tenants
       WHERE (? = '' OR lower(name) LIKE '%' || lower(?) || '%')
       ORDER BY name COLLATE NOCASE
     `,
       )
-      .all(query, query) as TenantSummary[];
+      .all(query, query) as Omit<TenantSummary, "members">[];
+    const getMembers = db.prepare(
+      `SELECT id, full_name AS name, email, role, job_title AS jobTitle,
+        joined_at AS joinedAt
+       FROM users WHERE tenant_id = ? ORDER BY full_name COLLATE NOCASE, email`,
+    );
+    const items: TenantSummary[] = tenants.map((tenant) => ({
+      ...tenant,
+      members: getMembers.all(tenant.id) as TenantSummary["members"],
+    }));
     return res.json({ items });
   });
 
@@ -94,7 +105,9 @@ export function createApp(db: Database.Database) {
       return res.status(403).json({ error: "tenant_user_required" });
     const members = db
       .prepare(
-        "SELECT id, email, role FROM users WHERE tenant_id = ? ORDER BY email",
+        `SELECT id, email, role, full_name AS name, job_title AS jobTitle,
+          joined_at AS joinedAt
+         FROM users WHERE tenant_id = ? ORDER BY full_name COLLATE NOCASE, email`,
       )
       .all(actor.tenantId);
     return res.json({ items: members });

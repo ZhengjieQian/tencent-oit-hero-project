@@ -3,6 +3,7 @@ import type { Actor } from "@hero/contracts";
 import { api } from "./api.js";
 import TenantDirectory from "./features/tenants/TenantDirectory.js";
 import TenantConsole from "./features/tenant-console/TenantConsole.js";
+import { localizedError, localizedRole, useI18n } from "./i18n.js";
 
 interface DemoActor extends Omit<Actor, "userId"> {
   id: string;
@@ -12,9 +13,10 @@ interface ActorList {
 }
 
 export default function App() {
+  const { language, setLanguage, t } = useI18n();
   const [actors, setActors] = useState<DemoActor[]>([]);
   const [actor, setActor] = useState<DemoActor | null>(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     void api<ActorList>("/api/dev/actors")
@@ -24,17 +26,11 @@ export default function App() {
           items.find((item) => item.id === "platform-admin") ?? items[0];
         if (initial) await switchActor(initial.id, items);
       })
-      .catch((cause: unknown) =>
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : "Could not load demo accounts.",
-        ),
-      );
+      .catch((cause: unknown) => setError(cause));
   }, []);
 
   async function switchActor(actorId: string, available: DemoActor[] = actors) {
-    setError("");
+    setError(null);
     try {
       await api("/api/dev/session", {
         method: "POST",
@@ -43,26 +39,42 @@ export default function App() {
       const next = available.find((item) => item.id === actorId) ?? null;
       setActor(next);
     } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : "Could not switch demo account.",
-      );
+      setError(cause);
     }
   }
 
   return (
     <div className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#home" aria-label="Northstar home">
+        <a className="brand" href="#home" aria-label={t("brand.home")}>
           <span className="brand-mark">N</span>
           <span>
-            northstar<small>SAAS PLATFORM</small>
+            northstar<small>{t("brand.subtitle")}</small>
           </span>
         </a>
         <div className="topbar-right">
+          <div
+            className="segmented language-switch"
+            role="group"
+            aria-label={t("language.label")}
+          >
+            <button
+              type="button"
+              aria-pressed={language === "zh"}
+              onClick={() => setLanguage("zh")}
+            >
+              中文
+            </button>
+            <button
+              type="button"
+              aria-pressed={language === "en"}
+              onClick={() => setLanguage("en")}
+            >
+              EN
+            </button>
+          </div>
           <label className="identity-label" htmlFor="demo-identity">
-            DEMO IDENTITY
+            {t("identity.label")}
           </label>
           <select
             id="demo-identity"
@@ -71,7 +83,7 @@ export default function App() {
           >
             {actors.map((item) => (
               <option value={item.id} key={item.id}>
-                {item.email} · {item.role.replace("_", " ")}
+                {item.email} · {localizedRole(item.role, t)}
               </option>
             ))}
           </select>
@@ -86,30 +98,30 @@ export default function App() {
           <div>
             <p className="breadcrumb">
               {actor?.role === "platform_admin"
-                ? "PLATFORM / CUSTOMERS"
-                : "ORGANIZATION / WORKSPACE"}
+                ? t("breadcrumb.platform")
+                : t("breadcrumb.organization")}
             </p>
             <h1>
               {actor?.role === "platform_admin"
-                ? "Platform overview"
-                : "Organization console"}
+                ? t("app.title.platform")
+                : t("app.title.organization")}
             </h1>
             <p className="muted">
               {actor?.role === "platform_admin"
-                ? "Monitor customer organizations and access."
-                : "Manage your team's SaaS workspace."}
+                ? t("app.description.platform")
+                : t("app.description.organization")}
             </p>
           </div>
         </div>
-        {error && (
+        {error !== null && (
           <p className="alert alert-error" role="alert">
-            {error}
+            {localizedError(error, t("error.loadAccounts"), t)}
           </p>
         )}
         {!actor ? (
           error ? null : (
             <section className="panel empty-state" role="status">
-              Preparing the demo workspace…
+              {t("app.loading")}
             </section>
           )
         ) : actor.role === "platform_admin" ? (
@@ -118,8 +130,7 @@ export default function App() {
           <TenantConsole key={actor.id} />
         )}
         <p className="demo-notice">
-          <span aria-hidden="true">ⓘ</span> Demo identity switching is
-          local-only and is not production authentication.
+          <span aria-hidden="true">ⓘ</span> {t("app.demoNotice")}
         </p>
       </main>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TenantStatusInfo } from "@hero/contracts";
 import { api } from "../../api.js";
+import { localizedError, localizedRole, useI18n } from "../../i18n.js";
 
 interface Member {
   id: string;
@@ -18,10 +19,11 @@ interface WorkspaceData {
 }
 
 export default function TenantConsole() {
+  const { t } = useI18n();
   const [tenant, setTenant] = useState<TenantStatusInfo | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [workspace, setWorkspace] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     let active = true;
@@ -40,12 +42,7 @@ export default function TenantConsole() {
         }
       })
       .catch((cause: unknown) => {
-        if (active)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Could not load tenant workspace.",
-          );
+        if (active) setError(cause);
       });
     return () => {
       active = false;
@@ -55,23 +52,24 @@ export default function TenantConsole() {
   if (error)
     return (
       <p className="alert alert-error" role="alert">
-        {error}
+        {localizedError(error, t("error.loadWorkspace"), t)}
       </p>
     );
   if (!tenant)
     return (
       <section className="panel empty-state" role="status">
-        Loading tenant workspace…
+        {t("console.loading")}
       </section>
     );
   if (tenant.status === "suspended")
     return (
       <section className="panel suspended-panel">
-        <span className="status-pill status-suspended">Suspended</span>
-        <h2>Workspace access is paused</h2>
+        <span className="status-pill status-suspended">
+          {t("console.suspendedStatus")}
+        </span>
+        <h2>{t("console.suspendedTitle")}</h2>
         <p>
-          {tenant.name} is currently suspended. Your data is preserved. Contact
-          your platform operator if you believe this is a mistake.
+          {t("console.suspendedBody", { tenant: tenant.name })}
         </p>
       </section>
     );
@@ -79,16 +77,16 @@ export default function TenantConsole() {
   return (
     <div className="tenant-grid">
       <section className="panel workspace-card">
-        <p className="eyebrow">TENANT WORKSPACE</p>
+        <p className="eyebrow">{t("console.workspaceEyebrow")}</p>
         <h2>{tenant.name}</h2>
-        <p className="muted">{workspace || "Loading workspace…"}</p>
-        <span className="status-pill status-active">Active</span>
+        <p className="muted">{workspace || t("console.loadingWorkspace")}</p>
+        <span className="status-pill status-active">{t("console.active")}</span>
       </section>
       <section className="panel">
         <div className="panel-heading compact">
           <div>
-            <p className="eyebrow">YOUR ORGANIZATION</p>
-            <h2>Team members</h2>
+            <p className="eyebrow">{t("console.organizationEyebrow")}</p>
+            <h2>{t("console.members")}</h2>
           </div>
           <span className="count-badge">{members.length}</span>
         </div>
@@ -100,7 +98,7 @@ export default function TenantConsole() {
               </span>
               <span className="member-info">
                 <strong>{member.email}</strong>
-                <small>{member.role.replace("_", " ")}</small>
+                  <small>{localizedRole(member.role, t)}</small>
               </span>
             </li>
           ))}
