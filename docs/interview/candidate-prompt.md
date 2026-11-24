@@ -11,12 +11,12 @@
 - 请简要讲出你的计划、假设、进度和风险；不清楚的业务规则可以向需求方提问。
 - 保持 Git 改动小而易审查，为你实现的行为补充测试。
 - 本地演练身份仅用于本地测试，不要添加真实身份服务凭证或把数据发送给外部服务。
-- 请在面试前安装项目要求的 Node.js/npm，并确认项目可以启动；环境安装不计入面试时间。如果无法准备好，请提前告知面试官。
+- 请在面试前 clone 仓库并运行对应系统的 `scripts/start-interview` 启动脚本，确认项目可以启动；首次运行需 Git、互联网连接和现代浏览器，会下载项目本地 Node.js 并安装依赖，环境准备不计入面试时间。如果网络策略阻止下载，请安装 Node.js 24.x 后告知面试官。
 - 最后展示完成的行为、运行过的检查和仍然存在的风险。
 
 - 面试官可能在三个必做阶段结束后提供可选加分题；加分题不影响必做阶段的通过判定。
 
-仓库已经包含可运行的 React 前端、REST API、SQLite 数据库、预置身份和基础页面。请先运行项目，再开始当前阶段的任务。候选人可见的 `npm run test:challenge` 只对应第一阶段。
+仓库已经包含可运行的 React 前端、REST API、SQLite 数据库、预置身份和基础页面。macOS/Linux 使用 `./scripts/start-interview.sh`；Windows PowerShell 使用 `./scripts/start-interview.ps1`。在浏览器打开 `http://127.0.0.1:5173/`，按 `Ctrl+C` 停止。请先运行项目，再开始当前阶段的任务。需要运行检查时，macOS/Linux 使用 `./scripts/npm.sh`，Windows PowerShell 使用 `./scripts/npm.ps1`；例如 `./scripts/npm.sh run test:challenge` 只对应第一阶段。
 
 
 ## Okta/OIDC

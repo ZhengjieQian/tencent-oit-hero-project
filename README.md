@@ -6,28 +6,32 @@ English: [`README.en.md`](README.en.md)
 
 ## 环境要求
 
-- Node.js 22.12.x 或 24.x（本 repo 依赖当前 Vite/jsdom 支持的 Node LTS 版本）
-- npm 10 或更新版本
+- Git、互联网连接和现代浏览器（建议 Chrome、Edge 或 Firefox）
+- macOS、Windows PowerShell 或使用 glibc 的 Linux（x64/ARM64）
+- 不需要预先安装 Node.js/npm：首次启动会把 Node.js 24.22.3 下载到本 repo 的 `.tools/`，校验官方 SHA-256，再安装锁定的 npm 依赖。不会修改系统级安装。
 
-若尚未安装 Node.js，请从[官方 Node.js 下载页](https://nodejs.org/en/download)安装 24.x（或 22.12.x 及以上的 22.x）；安装 Node.js 时会一并安装 npm。安装后重新打开终端，确认：
-
-```bash
-node --version
-npm --version
-```
-
-建议在面试前完成安装并按下方步骤启动项目。不要把安装环境计入 30–40 分钟面试时间。
+首次依赖安装需要互联网，可能需要几分钟；建议面试前 clone 并启动一次，不计入 30–40 分钟面试时间。若所在网络无法下载，可手动安装 [Node.js 24.x](https://nodejs.org/en/download) 后使用常规 npm 命令。
 
 ## 本地启动
 
+macOS/Linux：
+
 ```bash
-npm install
-npm run db:reset
-npm run dev
+./scripts/start-interview.sh
 ```
 
-- 前端：<http://localhost:5173>
-- API 健康检查：<http://localhost:3001/api/health>
+Windows PowerShell：
+
+```powershell
+.\scripts\start-interview.ps1
+```
+
+打开 <http://127.0.0.1:5173/>；API 健康检查为 <http://127.0.0.1:3001/api/health>。按 `Ctrl+C` 停止。依赖仅在首次运行或 `package-lock.json` 改变时安装；之后启动不会重置数据库。
+
+面试官开始每位候选人面试前，在已经启动过一次的 repo 中显式运行 `./scripts/npm.sh run db:reset`（Windows PowerShell: `./scripts/npm.ps1 run db:reset`），再启动项目。此命令会重置本地演示数据库。
+
+- 前端：<http://127.0.0.1:5173>
+- API 健康检查：<http://127.0.0.1:3001/api/health>
 
 应用默认使用平台运营身份。通过 **Demo identity** 选择器切换预置账号：
 
@@ -43,17 +47,19 @@ npm run dev
 ## 检查命令
 
 ```bash
-npm test                 # 起始代码已有行为，应该通过
-npm run test:challenge   # 第一阶段前端搜索验收测试，起始时会失败
-npm run typecheck
-npm run build
-npm run db:inspect       # 只读查看 SQLite 中的租户状态
+./scripts/npm.sh test                  # 起始代码已有行为，应该通过
+./scripts/npm.sh run test:challenge    # 第一阶段前端搜索验收测试，起始时会失败
+./scripts/npm.sh run typecheck
+./scripts/npm.sh run build
+./scripts/npm.sh run db:inspect        # 只读查看 SQLite 中的租户状态
 ```
+
+Windows PowerShell 将 `./scripts/npm.sh` 替换为 `./scripts/npm.ps1`。这些包装脚本使用首次启动时下载的本地 Node/npm，不要求另开终端设置 PATH。
 
 候选人会在面试中逐阶段收到需求说明。第一阶段是一个前端搜索 bug 修复；后续阶段的需求由面试官按进度单独发送。
 
 ## 题目
 
-通用规则见中文 [`docs/interview/candidate-prompt.md`](docs/interview/candidate-prompt.md) 和英文 [`docs/interview/candidate-prompt.en.md`](docs/interview/candidate-prompt.en.md)。面试官会另外分阶段发送需求说明；候选人初始拿到的 repo 不包含第二、三阶段题目。
+通用规则见中文 [`docs/interview/candidate-prompt.md`](docs/interview/candidate-prompt.md) 和英文 [`docs/interview/candidate-prompt.en.md`](docs/interview/candidate-prompt.en.md)。面试官会另外分阶段发送需求说明；候选人初始拿到的 repo 不包含第二、三阶段题目。启动项目后可用 `./scripts/npm.sh run test:challenge`（Windows: `./scripts/npm.ps1 run test:challenge`）运行第一阶段验收测试。
 
 本地可执行 Vercel CLI 指令时，建议安装 `npm i -g vercel`，可使用 `vercel env pull`、`vercel deploy` 和 `vercel logs` 等工作流；本面试项目本地运行不需要 CLI 或部署。

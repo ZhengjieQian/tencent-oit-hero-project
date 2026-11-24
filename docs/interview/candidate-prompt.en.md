@@ -11,12 +11,12 @@ You are an engineer on a SaaS platform team. The interviewer will play the reque
 - Briefly share your plan, assumptions, progress, and risks. Ask the requester about unclear business rules.
 - Keep Git changes small and reviewable. Add tests for the behavior you implement.
 - The local demo identities are for local testing only. Do not add real identity-service credentials or send data to external services.
-- Before the interview, install the required Node.js/npm versions and confirm the app starts. Setup time is not part of the interview; let the interviewer know in advance if you cannot prepare the environment.
+- Before the interview, clone the repository and run the `scripts/start-interview` launcher for your OS to confirm the app starts. First launch requires Git, internet access, and a modern browser; it downloads a project-local Node.js runtime and installs dependencies. Setup time is not part of the interview. If your network blocks the download, install Node.js 24.x manually and tell the interviewer.
 - At the end, demonstrate the behavior, list the checks you ran, and call out any remaining risks.
 
 - The interviewer may offer an optional bonus after the three required stages. The bonus does not affect the required-stage pass decision.
 
-The repository includes a runnable React front end, REST API, SQLite database, demo identities, and starter pages. Start the project before working on the current stage. The candidate-visible `npm run test:challenge` command covers Stage 1 only.
+The repository includes a runnable React front end, REST API, SQLite database, demo identities, and starter pages. On macOS/Linux run `./scripts/start-interview.sh`; in Windows PowerShell run `./scripts/start-interview.ps1`. Open `http://127.0.0.1:5173/` and press `Ctrl+C` to stop. Start the project before working on the current stage. To run checks, use `./scripts/npm.sh` on macOS/Linux or `./scripts/npm.ps1` in Windows PowerShell. For example, `./scripts/npm.sh run test:challenge` covers Stage 1 only.
 
 
 ## Okta/OIDC

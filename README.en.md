@@ -4,25 +4,29 @@ A local Vibe Coding interview project for junior full-stack engineers. The front
 
 ## Requirements
 
-- Node.js 22.12.x or 24.x
-- npm 10 or later
+- Git, an internet connection, and a modern browser (Chrome, Edge, or Firefox recommended)
+- macOS, Windows PowerShell, or glibc-based Linux (x64/ARM64)
+- Node.js/npm do not need to be preinstalled. First launch downloads Node.js 24.22.3 into this repo's ignored `.tools/` directory, verifies the official SHA-256 checksum, and installs locked npm dependencies. It does not modify a system-wide installation.
 
-If Node.js is not installed, get it from the [official Node.js download page](https://nodejs.org/en/download) and select version 24.x (or 22.12.x or later within the 22.x line). The Node.js installer includes npm. Reopen the terminal after installation and verify:
-
-```bash
-node --version
-npm --version
-```
-
-Please install and verify the environment before the interview; setup time is not part of the 30–40 minute exercise.
+The first dependency install needs internet and may take a few minutes. Clone and launch once before the interview; setup is outside the 30–40 minute exercise. If your network blocks the download, install [Node.js 24.x](https://nodejs.org/en/download) manually and use the regular npm commands.
 
 ## Run locally
 
+macOS/Linux:
+
 ```bash
-npm install
-npm run db:reset
-npm run dev
+./scripts/start-interview.sh
 ```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\start-interview.ps1
+```
+
+Open <http://127.0.0.1:5173/>; the API health check is <http://127.0.0.1:3001/api/health>. Press `Ctrl+C` to stop. Dependencies are installed only on the first launch or when `package-lock.json` changes. Normal launches do not reset the database.
+
+Before each candidate, the interviewer explicitly runs `./scripts/npm.sh run db:reset` (Windows PowerShell: `./scripts/npm.ps1 run db:reset`) in a repo that has been launched once, then starts the app. This resets the local demo database.
 
 - Web app: <http://localhost:5173>
 - API health check: <http://localhost:3001/api/health>
@@ -41,17 +45,19 @@ The identity selector is for local interview practice only. The demo-session API
 ## Checks
 
 ```bash
-npm test                 # Existing starter behavior; should pass
-npm run test:challenge   # Stage 1 front-end search acceptance test; fails before the fix
-npm run typecheck
-npm run build
-npm run db:inspect       # Read-only view of tenant status in SQLite
+./scripts/npm.sh test                  # Existing starter behavior; should pass
+./scripts/npm.sh run test:challenge    # Stage 1 search acceptance test; fails before the fix
+./scripts/npm.sh run typecheck
+./scripts/npm.sh run build
+./scripts/npm.sh run db:inspect        # Read-only view of tenant status in SQLite
 ```
+
+In Windows PowerShell, replace `./scripts/npm.sh` with `./scripts/npm.ps1`. These wrappers use the project-local Node/npm downloaded at first launch and do not require PATH setup in another terminal.
 
 The interviewer sends one requirement at a time. Stage 1 is a front-end search bug fix. Later-stage prompts are sent separately and are not included in the candidate repository.
 
 ## Interview prompt
 
-General candidate instructions: [`docs/interview/candidate-prompt.en.md`](docs/interview/candidate-prompt.en.md). Interviewers send each stage’s prompt separately. The interviewer answer card, rubric, and scorecard are kept private.
+General candidate instructions: [`docs/interview/candidate-prompt.en.md`](docs/interview/candidate-prompt.en.md). Interviewers send each stage’s prompt separately. The interviewer answer card, rubric, and scorecard are kept private. After starting the app, run the Stage 1 acceptance check with `./scripts/npm.sh run test:challenge` (Windows: `./scripts/npm.ps1 run test:challenge`).
 
 If you want to use the Vercel CLI locally, install it with `npm i -g vercel` for workflows such as `vercel env pull`, `vercel deploy`, and `vercel logs`. The CLI is not required to run this interview project locally.
