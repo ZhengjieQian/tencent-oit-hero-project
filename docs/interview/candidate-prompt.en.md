@@ -13,7 +13,10 @@ You are an engineer on a SaaS platform team. The interviewer will play the reque
 - The local demo identities are for local testing only. Do not add real identity-service credentials or send data to external services.
 - At the end, demonstrate the behavior, list the checks you ran, and call out any remaining risks.
 
+- The interviewer may offer an optional bonus after the three required stages. The bonus does not affect the required-stage pass decision.
+
 The repository includes a runnable React front end, REST API, SQLite database, demo identities, and starter pages. Start the project before working on the current stage. The candidate-visible `npm run test:challenge` command covers Stage 1 only.
+
 
 ## Okta/OIDC
 
