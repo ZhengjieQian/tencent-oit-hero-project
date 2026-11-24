@@ -1,58 +1,40 @@
-import { afterEach, describe, expect, it } from "vitest";
-import Database from "better-sqlite3";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { createDatabase, resetDatabase, seedDemoData } from "../src/db/database.js";
+import { describe, expect, it } from "vitest";
+import { initializeDatabase, resetDemoData, seedDemoData } from "../src/db/database.js";
+import { createTestDatabase } from "./helpers/database.js";
 
-describe("demo database reset", () => {
-  let tempDirectory: string;
-
-  afterEach(() => {
-    if (tempDirectory) rmSync(tempDirectory, { recursive: true, force: true });
-    delete process.env.DATABASE_FILE;
-  });
-
-  it("seeds the same demo actors more than once without duplicate-row errors", () => {
-    const db = createDatabase(":memory:");
+describe("PostgreSQL demo database", () => {
+  it("seeds the same demo data repeatedly without duplicate rows", async () => {
+    const { db } = await createTestDatabase();
     try {
-      seedDemoData(db);
-      expect(() => seedDemoData(db)).not.toThrow();
-      expect(db.prepare("SELECT id FROM tenants").all()).toHaveLength(2);
-      expect(db.prepare("SELECT id FROM users").all()).toHaveLength(4);
+      await seedDemoData(db);
+      expect((await db.query("SELECT id FROM tenants")).rows).toHaveLength(2);
+      expect((await db.query("SELECT id FROM users")).rows).toHaveLength(4);
     } finally {
-      db.close();
+      await db.end();
     }
   });
 
-  it("does not delete a file selected through DATABASE_FILE", () => {
-    tempDirectory = mkdtempSync(join(tmpdir(), "hero-reset-"));
-    const unrelatedPath = join(tempDirectory, "keep.txt");
-    writeFileSync(unrelatedPath, "keep this file");
-    process.env.DATABASE_FILE = unrelatedPath;
-
-    resetDatabase();
-
-    expect(readFileSync(unrelatedPath, "utf8")).toBe("keep this file");
+  it("re-runs schema initialization without overwriting tenant status", async () => {
+    const { db } = await createTestDatabase();
+    try {
+      await db.query("UPDATE tenants SET status='suspended' WHERE id='acme'");
+      await initializeDatabase(db);
+      await seedDemoData(db);
+      expect((await db.query("SELECT status FROM tenants WHERE id='acme'")).rows[0]).toEqual({ status: "suspended" });
+    } finally {
+      await db.end();
+    }
   });
 
-  it("resets the seeded database in place so an already-running API sees the new rows", () => {
-    resetDatabase();
-    const apiConnection = createDatabase();
+  it("resets seeded data in place so existing API connections see the reset", async () => {
+    const { db } = await createTestDatabase();
     try {
-      apiConnection
-        .prepare("UPDATE tenants SET status = 'suspended' WHERE id = 'acme'")
-        .run();
-
-      resetDatabase();
-
-      expect(
-        apiConnection
-          .prepare("SELECT status FROM tenants WHERE id = 'acme'")
-          .get(),
-      ).toEqual({ status: "active" });
+      await db.query("UPDATE tenants SET status='suspended' WHERE id='acme'");
+      await resetDemoData(db);
+      expect((await db.query("SELECT status FROM tenants WHERE id='acme'")).rows[0]).toEqual({ status: "active" });
+      expect((await db.query("SELECT id FROM tenants")).rows).toHaveLength(2);
     } finally {
-      apiConnection.close();
+      await db.end();
     }
   });
 });

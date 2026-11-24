@@ -1,19 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import type Database from "better-sqlite3";
+import type { Pool } from "pg";
 import { createApp } from "../src/app.js";
-import { createDatabase, seedDemoData } from "../src/db/database.js";
+import { createTestDatabase } from "./helpers/database.js";
 
 describe("starter tenant read paths", () => {
-  let db: Database.Database;
+  let db: Pool;
   let app: ReturnType<typeof createApp>;
 
-  beforeEach(() => {
-    db = createDatabase(":memory:");
-    seedDemoData(db);
+  beforeEach(async () => {
+    ({ db } = await createTestDatabase());
     app = createApp(db);
   });
-  afterEach(() => db.close());
+  afterEach(async () => db.end());
 
   async function signedIn(actorId: string) {
     const client = request.agent(app);

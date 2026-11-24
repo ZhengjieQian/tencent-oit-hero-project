@@ -63,6 +63,9 @@ if [[ ! -d "$ROOT/node_modules" || "$LOCK_HASH" != "$PREVIOUS" ]]; then
   printf '%s\n' "$LOCK_HASH" > "$MARKER"
 fi
 
+command -v docker >/dev/null 2>&1 || fail "Docker Desktop is required for the local PostgreSQL database. Install and start Docker Desktop, then retry."
+docker compose up -d --wait postgres || fail "Could not start PostgreSQL. Make sure Docker Desktop is running and port 5432 is available."
+
 cd "$ROOT"
 printf 'Starting interview app. Open http://127.0.0.1:5173/ . Press Ctrl+C to stop.\n'
 exec "$NODE" "$NPM_CLI" run dev

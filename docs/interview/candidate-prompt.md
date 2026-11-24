@@ -16,7 +16,7 @@
 
 - 面试官可能在三个必做阶段结束后提供可选加分题；加分题不影响必做阶段的通过判定。
 
-仓库已经包含可运行的 React 前端、REST API、SQLite 数据库、预置身份和基础页面。macOS/Linux 使用 `./scripts/start-interview.sh`；Windows PowerShell 使用 `./scripts/start-interview.ps1`。在浏览器打开 `http://127.0.0.1:5173/`，按 `Ctrl+C` 停止。请先运行项目，再开始当前阶段的任务。需要运行检查时，macOS/Linux 使用 `./scripts/npm.sh`，Windows PowerShell 使用 `./scripts/npm.ps1`；例如 `./scripts/npm.sh run test:challenge` 只对应第一阶段。
+仓库已经包含可运行的 React 前端、REST API、PostgreSQL 数据库、预置身份和基础页面。首次启动需要 Docker Desktop，启动脚本会自动运行本地 PostgreSQL。macOS/Linux 使用 `./scripts/start-interview.sh`；Windows PowerShell 使用 `./scripts/start-interview.ps1`。在浏览器打开 `http://127.0.0.1:5173/`，按 `Ctrl+C` 停止前后端；PostgreSQL 容器继续运行。请先运行项目，再开始当前阶段的任务。需要运行检查时，macOS/Linux 使用 `./scripts/npm.sh`，Windows PowerShell 使用 `./scripts/npm.ps1`；例如 `./scripts/npm.sh run test:challenge` 只对应第一阶段。
 
 
 ## Okta/OIDC

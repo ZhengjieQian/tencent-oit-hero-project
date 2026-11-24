@@ -62,6 +62,11 @@ if (!(Test-Path (Join-Path $Root 'node_modules')) -or $LockHash -ne $Previous) {
   Set-Content -NoNewline -Path $Marker -Value $LockHash
 }
 
+if (!(Get-Command docker -ErrorAction SilentlyContinue)) { Stop-WithMessage 'Docker Desktop is required for the local PostgreSQL database. Install and start Docker Desktop, then retry.' }
+Push-Location $Root
+try { & docker compose up -d --wait postgres; if ($LASTEXITCODE -ne 0) { Stop-WithMessage 'Could not start PostgreSQL. Make sure Docker Desktop is running and port 5432 is available.' } }
+finally { Pop-Location }
+
 Set-Location $Root
 Write-Host 'Starting interview app. Open http://127.0.0.1:5173/ . Press Ctrl+C to stop.'
 & $NpmCmd run dev

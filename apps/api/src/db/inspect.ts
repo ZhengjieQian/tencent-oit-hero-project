@@ -1,13 +1,10 @@
-import { createDatabase } from "./database.js";
+import { createDatabase, initializeDatabase } from "./database.js";
 
 const db = createDatabase();
 try {
-  const tenants = db
-    .prepare(
-      "SELECT id, name, status FROM tenants ORDER BY name COLLATE NOCASE",
-    )
-    .all();
-  console.table(tenants);
+  await initializeDatabase(db);
+  const tenants = await db.query("SELECT id, name, status FROM tenants ORDER BY lower(name)");
+  console.table(tenants.rows);
 } finally {
-  db.close();
+  await db.end();
 }

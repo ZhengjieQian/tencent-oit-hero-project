@@ -1,22 +1,13 @@
-import Database from "better-sqlite3";
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { Pool, type PoolClient } from "pg";
 
-export const DEFAULT_DATABASE_FILE = fileURLToPath(
-  new URL("../../data/hero.sqlite", import.meta.url),
-);
+export const DEFAULT_DATABASE_URL = "postgres://hero:hero@127.0.0.1:5432/hero";
 
-export function createDatabase(
-  filename = DEFAULT_DATABASE_FILE,
-): Database.Database {
-  if (filename !== ":memory:") {
-    mkdirSync(dirname(filename), { recursive: true });
-  }
-  const db = new Database(filename);
-  db.pragma("foreign_keys = ON");
-  db.pragma("journal_mode = WAL");
-  db.exec(`
+export function createDatabase(connectionString = process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL): Pool {
+  return new Pool({ connectionString, max: 10 });
+}
+
+export async function initializeDatabase(db: Pool): Promise<void> {
+  await db.query(`
     CREATE TABLE IF NOT EXISTS tenants (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -34,60 +25,78 @@ export function createDatabase(
     CREATE INDEX IF NOT EXISTS idx_users_tenant_id ON users(tenant_id);
 
     CREATE TABLE IF NOT EXISTS audit_events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id BIGSERIAL PRIMARY KEY,
       actor_user_id TEXT NOT NULL REFERENCES users(id),
       tenant_id TEXT NOT NULL REFERENCES tenants(id),
       action TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
   `);
-  return db;
 }
 
-export function seedDemoData(db: Database.Database): void {
-  db.transaction(() => insertDemoData(db))();
-}
-
-export function resetDemoData(db: Database.Database): void {
-  db.transaction(() => {
-    db.exec(
-      "DELETE FROM audit_events; DELETE FROM users; DELETE FROM tenants;",
-    );
-    insertDemoData(db);
-  })();
-}
-
-export function resetDatabase(): void {
-  const db = createDatabase();
+export async function seedDemoData(db: Pool): Promise<void> {
+  const client = await db.connect();
   try {
-    resetDemoData(db);
+    await client.query("BEGIN");
+    await insertDemoData(client);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
   } finally {
-    db.close();
+    client.release();
   }
 }
 
-function insertDemoData(db: Database.Database): void {
-  db.prepare(
-    "INSERT OR IGNORE INTO tenants (id, name, status, subscription_ends_at) VALUES (?, ?, ?, ?)",
-  ).run("acme", "Acme Studio", "active", "2027-01-15");
-  db.prepare(
-    "INSERT OR IGNORE INTO tenants (id, name, status, subscription_ends_at) VALUES (?, ?, ?, ?)",
-  ).run("globex", "Globex Labs", "active", "2026-12-01");
-  const insertUser = db.prepare(
-    "INSERT OR IGNORE INTO users (id, email, role, tenant_id) VALUES (?, ?, ?, ?)",
-  );
-  insertUser.run(
-    "platform-admin",
-    "ops@northstar.example",
-    "platform_admin",
-    null,
-  );
-  insertUser.run("acme-admin", "admin@acme.example", "tenant_admin", "acme");
-  insertUser.run(
-    "globex-admin",
-    "admin@globex.example",
-    "tenant_admin",
-    "globex",
-  );
-  insertUser.run("acme-member", "member@acme.example", "member", "acme");
+export async function resetDemoData(db: Pool): Promise<void> {
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM audit_events");
+    await client.query("DELETE FROM users");
+    await client.query("DELETE FROM tenants");
+    await insertDemoData(client);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function resetDatabase(): Promise<void> {
+  const db = createDatabase();
+  try {
+    await initializeDatabase(db);
+    await resetDemoData(db);
+  } finally {
+    await db.end();
+  }
+}
+
+async function insertDemoData(db: PoolClient): Promise<void> {
+  const tenants = [
+    ["acme", "Acme Studio", "active", "2027-01-15"],
+    ["globex", "Globex Labs", "active", "2026-12-01"],
+  ] as const;
+  for (const tenant of tenants) {
+    await db.query(
+      "INSERT INTO tenants (id,name,status,subscription_ends_at) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO NOTHING",
+      [...tenant],
+    );
+  }
+
+  const users = [
+    ["platform-admin", "ops@northstar.example", "platform_admin", null],
+    ["acme-admin", "admin@acme.example", "tenant_admin", "acme"],
+    ["globex-admin", "admin@globex.example", "tenant_admin", "globex"],
+    ["acme-member", "member@acme.example", "member", "acme"],
+  ] as const;
+  for (const user of users) {
+    await db.query(
+      "INSERT INTO users (id,email,role,tenant_id) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO NOTHING",
+      [...user],
+    );
+  }
 }

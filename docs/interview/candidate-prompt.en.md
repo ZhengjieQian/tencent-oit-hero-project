@@ -16,7 +16,7 @@ You are an engineer on a SaaS platform team. The interviewer will play the reque
 
 - The interviewer may offer an optional bonus after the three required stages. The bonus does not affect the required-stage pass decision.
 
-The repository includes a runnable React front end, REST API, SQLite database, demo identities, and starter pages. On macOS/Linux run `./scripts/start-interview.sh`; in Windows PowerShell run `./scripts/start-interview.ps1`. Open `http://127.0.0.1:5173/` and press `Ctrl+C` to stop. Start the project before working on the current stage. To run checks, use `./scripts/npm.sh` on macOS/Linux or `./scripts/npm.ps1` in Windows PowerShell. For example, `./scripts/npm.sh run test:challenge` covers Stage 1 only.
+The repository includes a runnable React front end, REST API, PostgreSQL database, demo identities, and starter pages. Docker Desktop is required on first launch; the startup script automatically runs local PostgreSQL. On macOS/Linux run `./scripts/start-interview.sh`; in Windows PowerShell run `./scripts/start-interview.ps1`. Open `http://127.0.0.1:5173/` and press `Ctrl+C` to stop the front end and API; PostgreSQL keeps running. Start the project before working on the current stage. To run checks, use `./scripts/npm.sh` on macOS/Linux or `./scripts/npm.ps1` in Windows PowerShell. For example, `./scripts/npm.sh run test:challenge` covers Stage 1 only.
 
 
 ## Okta/OIDC

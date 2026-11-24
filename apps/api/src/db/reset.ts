@@ -1,4 +1,4 @@
 import { resetDatabase } from "./database.js";
 
-resetDatabase();
-console.log("Demo database reset complete.");
+await resetDatabase();
+console.log("Demo PostgreSQL database reset complete.");
