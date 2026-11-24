@@ -11,6 +11,7 @@ You are an engineer on a SaaS platform team. The interviewer will play the reque
 - Briefly share your plan, assumptions, progress, and risks. Ask the requester about unclear business rules.
 - Keep Git changes small and reviewable. Add tests for the behavior you implement.
 - The local demo identities are for local testing only. Do not add real identity-service credentials or send data to external services.
+- Before the interview, install the required Node.js/npm versions and confirm the app starts. Setup time is not part of the interview; let the interviewer know in advance if you cannot prepare the environment.
 - At the end, demonstrate the behavior, list the checks you ran, and call out any remaining risks.
 
 - The interviewer may offer an optional bonus after the three required stages. The bonus does not affect the required-stage pass decision.

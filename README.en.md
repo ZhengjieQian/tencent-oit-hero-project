@@ -7,6 +7,15 @@ A local Vibe Coding interview project for junior full-stack engineers. The front
 - Node.js 22.12.x or 24.x
 - npm 10 or later
 
+If Node.js is not installed, get it from the [official Node.js download page](https://nodejs.org/en/download) and select version 24.x (or 22.12.x or later within the 22.x line). The Node.js installer includes npm. Reopen the terminal after installation and verify:
+
+```bash
+node --version
+npm --version
+```
+
+Please install and verify the environment before the interview; setup time is not part of the 30–40 minute exercise.
+
 ## Run locally
 
 ```bash

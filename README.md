@@ -9,6 +9,15 @@ English: [`README.en.md`](README.en.md)
 - Node.js 22.12.x 或 24.x（本 repo 依赖当前 Vite/jsdom 支持的 Node LTS 版本）
 - npm 10 或更新版本
 
+若尚未安装 Node.js，请从[官方 Node.js 下载页](https://nodejs.org/en/download)安装 24.x（或 22.12.x 及以上的 22.x）；安装 Node.js 时会一并安装 npm。安装后重新打开终端，确认：
+
+```bash
+node --version
+npm --version
+```
+
+建议在面试前完成安装并按下方步骤启动项目。不要把安装环境计入 30–40 分钟面试时间。
+
 ## 本地启动
 
 ```bash
